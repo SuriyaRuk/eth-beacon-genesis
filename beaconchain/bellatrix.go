@@ -52,9 +52,18 @@ func (b *bellatrixBuilder) BuildState() (*spec.VersionedBeaconState, error) {
 	genesisBlockHash := genesisBlock.Hash()
 
 	extra := genesisBlock.Extra()
-	if len(extra) > 128 {
-		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 128)
+	// Remove leading zeros and pad to exactly 32 bytes
+	trimmedExtra := extra
+	for len(trimmedExtra) > 0 && trimmedExtra[0] == 0 {
+		trimmedExtra = trimmedExtra[1:]
 	}
+	paddedExtra := make([]byte, 32)
+	if len(trimmedExtra) <= 32 {
+		copy(paddedExtra[32-len(trimmedExtra):], trimmedExtra)
+	} else {
+		copy(paddedExtra, trimmedExtra[:32])
+	}
+	extra = paddedExtra
 
 	baseFee, _ := uint256.FromBig(genesisBlock.BaseFee())
 
