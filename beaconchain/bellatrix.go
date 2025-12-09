@@ -52,16 +52,27 @@ func (b *bellatrixBuilder) BuildState() (*spec.VersionedBeaconState, error) {
 	genesisBlockHash := genesisBlock.Hash()
 
 	extra := genesisBlock.Extra()
-	// Remove leading zeros and pad to exactly 32 bytes
-	trimmedExtra := extra
-	for len(trimmedExtra) > 0 && trimmedExtra[0] == 0 {
-		trimmedExtra = trimmedExtra[1:]
+	// Ensure ExtraData is exactly 32 bytes for ExecutionPayloadHeader
+	// Find the first non-zero byte
+	start := 0
+	for start < len(extra) && extra[start] == 0 {
+		start++
 	}
+	
+	// Find the last non-zero byte
+	end := len(extra) - 1
+	for end >= start && extra[end] == 0 {
+		end--
+	}
+	
 	paddedExtra := make([]byte, 32)
-	if len(trimmedExtra) <= 32 {
-		copy(paddedExtra[32-len(trimmedExtra):], trimmedExtra)
-	} else {
-		copy(paddedExtra, trimmedExtra[:32])
+	if end >= start {
+		significantData := extra[start : end+1]
+		if len(significantData) <= 32 {
+			copy(paddedExtra, significantData)
+		} else {
+			copy(paddedExtra, significantData[:32])
+		}
 	}
 	extra = paddedExtra
 

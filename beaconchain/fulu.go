@@ -55,9 +55,29 @@ func (b *fuluBuilder) BuildState() (*spec.VersionedBeaconState, error) {
 	genesisBlockHash := genesisBlock.Hash()
 
 	extra := genesisBlock.Extra()
-	if len(extra) > 128 {
-		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 128)
+	// Ensure ExtraData is exactly 32 bytes for ExecutionPayloadHeader
+	// Find the first non-zero byte
+	start := 0
+	for start < len(extra) && extra[start] == 0 {
+		start++
 	}
+	
+	// Find the last non-zero byte
+	end := len(extra) - 1
+	for end >= start && extra[end] == 0 {
+		end--
+	}
+	
+	paddedExtra := make([]byte, 32)
+	if end >= start {
+		significantData := extra[start : end+1]
+		if len(significantData) <= 32 {
+			copy(paddedExtra, significantData)
+		} else {
+			copy(paddedExtra, significantData[:32])
+		}
+	}
+	extra = paddedExtra
 
 	baseFee, _ := uint256.FromBig(genesisBlock.BaseFee())
 
