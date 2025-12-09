@@ -52,8 +52,8 @@ func (b *bellatrixBuilder) BuildState() (*spec.VersionedBeaconState, error) {
 	genesisBlockHash := genesisBlock.Hash()
 
 	extra := genesisBlock.Extra()
-	if len(extra) > 32 {
-		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 32)
+	if len(extra) > 128 {
+		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 128)
 	}
 
 	baseFee, _ := uint256.FromBig(genesisBlock.BaseFee())

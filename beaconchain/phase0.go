@@ -49,8 +49,8 @@ func (b *phase0Builder) BuildState() (*spec.VersionedBeaconState, error) {
 	genesisBlockHash := genesisBlock.Hash()
 
 	extra := genesisBlock.Extra()
-	if len(extra) > 32 {
-		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 32)
+	if len(extra) > 128 {
+		return nil, fmt.Errorf("extra data is %d bytes, max is %d", len(extra), 128)
 	}
 
 	depositRoot, err := beaconutils.ComputeDepositRoot(b.clConfig)
